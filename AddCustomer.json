@@ -1,0 +1,23 @@
+{
+    
+    "firstName": "Sumit",
+    "lastName": "bshs",
+    "address": "Airoli",
+    "phoneNumber": 81191,
+    "socialSecurityNumber": 1233,
+    "account": [
+        {
+            
+            "accountType": "savings",
+            "amount": 300.00,
+            "accountNumber": 12322
+            
+        },
+         {
+            
+            "accountType": "checking",
+            "amount": 300.00,
+            "accountNumber": 12322
+        }
+    ]
+}

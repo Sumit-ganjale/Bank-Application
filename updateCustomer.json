@@ -1,0 +1,23 @@
+{
+    "customer_id":2,
+    "firstName": "Suraj",
+    "lastName": "bshs",
+    "address": "Mandhae",
+    "phoneNumber": 81191,
+    "socialSecurityNumber": 1233,
+    "account": [
+        {
+            "account_id":1,
+            "accountType": "money_market",
+            "amount": 300.00,
+            "accountNumber": 12322
+            
+        },
+         {
+            "account_id":2,
+            "accountType": "checking",
+            "amount": 300.00,
+            "accountNumber": 12322
+        }
+    ]
+}
