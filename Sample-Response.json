@@ -1,0 +1,10 @@
+[
+    {
+        "statusCode": 400,
+        "message": "Error parsing Attribute :phoneNumber, reason : PhoneNumber cannot be blank"
+    },
+    {
+        "statusCode": 400,
+        "message": "Error parsing Attribute :firstName, reason : FirstName cannot be blank"
+    }
+]
