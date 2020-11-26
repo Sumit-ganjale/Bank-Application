@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lti.banking.system.entity.Account;
 import com.lti.banking.system.entity.Customers;
 import com.lti.banking.system.entity.Errors;
+import com.lti.banking.system.entity.Messages;
 import com.lti.banking.system.service.AccountService;
 import com.lti.banking.system.service.CustomerService;
 import com.lti.banking.system.service.FundTransferService;
@@ -44,12 +45,16 @@ public class BankController {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@GetMapping(path = "/getCustomer", produces = "application/json")
 	public ResponseEntity getAllCustomer() {
+		try{
 		List<Customers> customer = this.customerService.findAll();
 		if (customer != null)
 			return new ResponseEntity(customer, HttpStatus.OK);
 		else
 			return new ResponseEntity("No Customer Found", HttpStatus.BAD_REQUEST);
-
+		}catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+					"Server encountered internal error,please contact system administrator");
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -59,7 +64,8 @@ public class BankController {
 			Customers customer1 = this.customerService.findByID(customer.getFirstName(), customer.getPhoneNumber());
 			if(customer1==null){
 			customerService.addCustomer(customer);
-			return ResponseEntity.status(HttpStatus.CREATED).body("Account  Created successfully");
+
+			return ResponseEntity.status(HttpStatus.CREATED).body(addMessages("Account Created Successfully"));
 			}else{
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer Already Exists");
 			}
@@ -71,6 +77,8 @@ public class BankController {
 					"Server encountered internal error,please contact system administrator");
 		}
 	}
+
+
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@GetMapping(path = "/{firstName}/{phoneNumber}", produces = "application/json")
@@ -88,11 +96,9 @@ public class BankController {
 	public ResponseEntity deleteCustomer(@RequestBody Customers customer) {
 		try {
 			customerService.deleteCustomer(customer);
-			return ResponseEntity.status(HttpStatus.OK).body("Customers deleted successfully");
-
+			return ResponseEntity.status(HttpStatus.OK).body(addMessages("Customers deleted successfully"));
 		} catch (ConstraintViolationException e) {
 			List<Errors> message = createMessage(e.getConstraintViolations());
-
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -107,7 +113,7 @@ public class BankController {
 
 		try {
 			customerService.updateCustomer(customer);
-			return ResponseEntity.status(HttpStatus.CREATED).body("Customer updated successfully");
+			return ResponseEntity.status(HttpStatus.CREATED).body(addMessages("Customer updated successfully"));
 
 		} catch (ConstraintViolationException e) {
 			List<Errors> message = createMessage(e.getConstraintViolations());
@@ -144,7 +150,7 @@ public class BankController {
 			 @RequestParam(value = "amount") long amount) {
 		Set<Account> accountList = customerService.getAccountDetails(firstName, phoneNumber);
 		if (this.fundTransferService.tranferToOwnBankAccounts(accountList, fromAccount, toAccount, amount)) {
-			return ResponseEntity.status(HttpStatus.CREATED).body("Fund transfer successfull");
+			return ResponseEntity.status(HttpStatus.CREATED).body(addMessages("Fund transfer successfull"));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient balance");
 		}
@@ -154,22 +160,51 @@ public class BankController {
 	public ResponseEntity deposit(@RequestParam(value = "firstName") String firstName,
 			@RequestParam(value = "phoneNumber") Integer phoneNumber,
 			@RequestParam(value = "toAccount") String toAccount, @RequestParam(value = "amount") long amount) {
+		try{
 		Set<Account> accountList = customerService.getAccountDetails(firstName, phoneNumber);
+		if(accountList!=null){
 		BigDecimal amounts=this.accountService.deposit(accountList, toAccount, amount);
-			return ResponseEntity.status(HttpStatus.CREATED).body("Amount of " +amount+ "$ credited successfully account balance is "+amounts+"$");
+		return ResponseEntity.status(HttpStatus.CREATED).body(addMessages("Amount of " +amount+ "$ credited successfully account balance is "+amounts+"$"));
+		}
+		else{
+			return new ResponseEntity("No Account found for Customer "+firstName, HttpStatus.BAD_REQUEST);
+		}}
+		catch(Exception e){
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+					"Server encountered internal error please contact system administator");
+		}
 
-	}
+
+		}
 	@PutMapping("/withdraw")
 	public ResponseEntity withdraw(@RequestParam(value = "firstName") String firstName,
 			@RequestParam(value = "phoneNumber") Integer phoneNumber,
 			@RequestParam(value = "fromAccount") String fromAccount,
 			 @RequestParam(value = "amount") long amount) {
+		try{
 		Set<Account> accountList = customerService.getAccountDetails(firstName, phoneNumber);
+		if(accountList!=null){
 		if (this.accountService.withdraw(accountList, fromAccount, amount)) {
-			return ResponseEntity.status(HttpStatus.CREATED).body("Amount withdraw successfully");
+			return ResponseEntity.status(HttpStatus.CREATED).body(addMessages("Amount withdrawn successfully"));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient balance");
 		}
+		}else{
+			return new ResponseEntity("No Account found for Customer "+firstName, HttpStatus.BAD_REQUEST);
+		}
+		}catch(Exception e){
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+					"Server encountered internal error please contact system administator");
+		}
+	}
+
+	private Messages addMessages(String string) {
+
+		Messages message=new Messages();
+		message.setMessage("Success");
+		message.setDescription(string);
+		return message;
+
 	}
 
 	private List<Errors> createMessage(Set<ConstraintViolation<?>> set) {

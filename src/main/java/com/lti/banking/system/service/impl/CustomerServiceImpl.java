@@ -56,7 +56,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public Set<Account> getAccountDetails(String firstName, Integer phoneNumber) {
 		//return null;
-		return customerRepositoryDao.findByNumber(firstName,phoneNumber).getAccount();
-	}
+		Customers customer=customerRepositoryDao.findByNumber(firstName,phoneNumber);
+		if(customer!=null){
+		return customer.getAccount();
+		}
+		return null;
 
-}
+}}

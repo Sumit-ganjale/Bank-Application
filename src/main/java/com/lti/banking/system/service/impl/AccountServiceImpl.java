@@ -34,6 +34,7 @@ public class AccountServiceImpl implements AccountService {
 				} else if (account.getAccountType().equals(money_market)) {
 					moneyMarketAccount = account;
 				}
+			}
 				if (fromAccount.equals(savings)) {
 						savingAccount.setAmount(savingAccount.getAmount().add(new BigDecimal(amount)));
 						accountRepositoryDAO.update(savingAccount);
@@ -48,9 +49,9 @@ public class AccountServiceImpl implements AccountService {
 						accountRepositoryDAO.update(moneyMarketAccount);
 						return chackingAccount.getAmount();
 					}
+				return null;
 			}
-			return null;
-		}
+
 
 
 
@@ -74,6 +75,7 @@ public class AccountServiceImpl implements AccountService {
 			} else if (account.getAccountType().equals(money_market)) {
 				moneyMarketAccount = account;
 			}
+		}
 			if (fromAccount.equals(savings)) {
 				if (validateAmount(savingAccount, amount)) {
 					savingAccount.setAmount(savingAccount.getAmount().subtract(new BigDecimal(amount)));
@@ -96,7 +98,7 @@ public class AccountServiceImpl implements AccountService {
 					return false;
 				}
 			}
-		}
+
 		return true;
 	}
 
